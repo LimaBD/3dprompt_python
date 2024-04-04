@@ -1,24 +1,26 @@
 name: Release
 
 on:
-  pull_request:
-    branches:
-    - main
-  push:
-    branches:
-    - main
+  workflow_dispatch:
 
 jobs:
-  pypi-publish:
-    name: Upload release to PyPI
+  publish:
+    name: publish
     runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/access_3dprompt
-    permissions:
-      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
-    steps:
-    # retrieve your distributions here
 
-    - name: Publish package distributions to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Rye
+        run: |
+          curl -sSf https://rye-up.com/get | bash
+          echo "$HOME/.rye/shims" >> $GITHUB_PATH
+        env:
+          RYE_VERSION: 0.24.0
+          RYE_INSTALL_OPTION: "--yes"
+
+      - name: Publish to PyPI
+        run: |
+          bash ./tools/publish.bash
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
